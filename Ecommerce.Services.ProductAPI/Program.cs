@@ -1,7 +1,6 @@
-using AutoMapper;
+using System.Reflection;
 using Ecommerce.Services.ProductAPI.dbcontexts;
 using Ecommerce.Services.ProductAPI.Repository;
-using Ecommerce.Services.ProductAPI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -18,19 +17,24 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-IMapper mapper = MappingConfig.RegisterMaps().CreateMapper();
-builder.Services.AddSingleton(mapper);
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-//ioc 
-builder.Services.AddScoped<IProductRepository, ProductRepository>(); // PRoductRepository pr = new ProductRepository
+builder.Services.AddScoped<IProductRepository, ProductRepository>(); 
 builder.Services.AddControllers();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
-
-
-
         options.Authority = "https://localhost:44365/";
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -94,5 +98,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.UseCors("AllowAll");
 app.Run();

@@ -9,9 +9,7 @@ namespace Ecommerce.Services.ProductAPI.Repository
     public class ProductRepository : IProductRepository
     {
         private readonly ApplicationDbContext _db;
-        private IMapper _mapper;
-
-        //Constructor Injection 
+        private readonly IMapper _mapper;
         public ProductRepository(ApplicationDbContext db, IMapper mapper)
         {
             _db = db;
@@ -20,33 +18,57 @@ namespace Ecommerce.Services.ProductAPI.Repository
 
         public async Task<ProductDto> CreateUpdateProduct(ProductDto productDto)
         {
-            Product product = _mapper.Map<ProductDto, Product>(productDto);
-            //gelen ProductDto nun içindeki ProductId 0 dan büyük ise güncelleme yapılacak
-            if (product.ProductId > 0)
+            try
             {
-                _db.Products.Update(product);
-            }
-            else
-            {
-                //0 dan böyük değilse yeni bir kayıt eklenecek
+                var product = _mapper.Map<Product>(productDto);
 
-                _db.Products.Add(product);
+                if (product.Variants != null)
+                {
+                    foreach (var variant in product.Variants)
+                    {
+                        variant.ProductId = product.ProductId;
+                    }
+                }
+
+                if (product.Images != null)
+                {
+                    foreach (var image in product.Images)
+                    {
+                        image.ProductId = product.ProductId;
+                    }
+                }
+
+                if (product.ProductId > 0)
+                {
+                    _db.Products.Update(product);
+                }
+                else
+                {
+                    _db.Products.Add(product);
+                }
+
+                await _db.SaveChangesAsync();
+                return _mapper.Map<ProductDto>(product);
             }
-            await _db.SaveChangesAsync();
-            //kayıt eklendikten sonra databaseden eklenen product objesi geriye produtcDto olarak döndürülür
-            return _mapper.Map<Product, ProductDto>(product);
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public async Task<bool> DeleteProduct(int productId)
         {
             try
             {
-                Product product = await _db.Products.FirstOrDefaultAsync(u => u.ProductId == productId);
+                var product = await _db.Products.Include(p => p.Variants).Include(p => p.Images)
+                    .FirstOrDefaultAsync(u => u.ProductId == productId);
+
                 if (product == null)
                 {
                     return false;
                 }
-                _db.Products.Remove(product); //delete from Product where Id=productId
+
+                _db.Products.Remove(product);
                 await _db.SaveChangesAsync();
                 return true;
             }
@@ -58,15 +80,21 @@ namespace Ecommerce.Services.ProductAPI.Repository
 
         public async Task<ProductDto> GetProductById(int productId)
         {
-            //linq select * from Product where Id=productId
-            //{Id:1,Name : Product1}
-            Product product = await _db.Products.Where(x => x.ProductId == productId).FirstOrDefaultAsync();
+            var product = await _db.Products
+                .Include(p => p.Variants)
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(x => x.ProductId == productId);
+
             return _mapper.Map<ProductDto>(product);
         }
 
         public async Task<IEnumerable<ProductDto>> GetProducts()
         {
-            List<Product> productList = await _db.Products.ToListAsync();
+            var productList = await _db.Products
+                .Include(p => p.Variants)
+                .Include(p => p.Images)
+                .ToListAsync();
+
             return _mapper.Map<List<ProductDto>>(productList);
         }
     }

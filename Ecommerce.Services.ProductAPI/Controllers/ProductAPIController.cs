@@ -1,4 +1,5 @@
-﻿using Ecommerce.Services.ProductAPI.dto;
+﻿using AutoMapper;
+using Ecommerce.Services.ProductAPI.dto;
 using Ecommerce.Services.ProductAPI.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -6,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce.Services.ProductAPI.Controllers
 {
-    [Route("api/products")]
+  [Route("api/products")]
     public class ProductAPIController : ControllerBase
     {
         protected ResponseDto _response;
@@ -54,21 +55,22 @@ namespace Ecommerce.Services.ProductAPI.Controllers
 
 
         [HttpPost]
-        [Authorize]
-        public async Task<object> Post([FromBody] ProductDto productDto)
+        public async Task<IActionResult> Post([FromBody] ProductDto productDto)
         {
             try
             {
-                ProductDto model = await _productRepository.CreateUpdateProduct(productDto);
-                _response.Result = model;
+                var result = await _productRepository.CreateUpdateProduct(productDto);
+                
+                return Ok(new ResponseDto { Result = result });
             }
-            catch (Exception ex)
+            catch (AutoMapperMappingException ex)
             {
-                _response.IsSuccess = false;
-                _response.ErrorMessages
-                     = new List<string>() { ex.ToString() };
+                return StatusCode(500, new ResponseDto
+                {
+                    IsSuccess = false,
+                    ErrorMessages = new List<string> { $"Mapping error: {ex.Message}" }
+                });
             }
-            return _response;
         }
 
 

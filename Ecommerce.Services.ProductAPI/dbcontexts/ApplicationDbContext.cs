@@ -7,51 +7,37 @@ namespace Ecommerce.Services.ProductAPI.dbcontexts
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
-
         }
+
         public DbSet<Product> Products { get; set; }
+        public DbSet<Variant> Variants { get; set; }
+        public DbSet<Image> Images { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Product>()
+                .HasMany(p => p.Variants)
+                .WithOne(v => v.Product)
+                .HasForeignKey(v => v.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Product>().HasData(new Product
-            {
-                ProductId = 1,
-                Name = "Samosa",
-                Price = 15,
-                Description = "Praesent scelerisque, mi sed ultrices condimentum, lacus ipsum viverra massa, in lobortis sapien eros in arcu. Quisque vel lacus ac magna vehicula sagittis ut non lacus.<br/>Sed volutpat tellus lorem, lacinia tincidunt tellus varius nec. Vestibulum arcu turpis, facilisis sed ligula ac, maximus malesuada neque. Phasellus commodo cursus pretium.",
-                ImageUrl = "samosa.jpg",
-                CategoryName = "Appetizer"
-            });
-            modelBuilder.Entity<Product>().HasData(new Product
-            {
-                ProductId = 2,
-                Name = "Paneer Tikka",
-                Price = 13.99,
-                Description = "Praesent scelerisque, mi sed ultrices condimentum, lacus ipsum viverra massa, in lobortis sapien eros in arcu. Quisque vel lacus ac magna vehicula sagittis ut non lacus.<br/>Sed volutpat tellus lorem, lacinia tincidunt tellus varius nec. Vestibulum arcu turpis, facilisis sed ligula ac, maximus malesuada neque. Phasellus commodo cursus pretium.",
-                ImageUrl = "panertikka.jpg",
-                CategoryName = "Appetizer"
-            });
-            modelBuilder.Entity<Product>().HasData(new Product
-            {
-                ProductId = 3,
-                Name = "Sweet Pie",
-                Price = 10.99,
-                Description = "Praesent scelerisque, mi sed ultrices condimentum, lacus ipsum viverra massa, in lobortis sapien eros in arcu. Quisque vel lacus ac magna vehicula sagittis ut non lacus.<br/>Sed volutpat tellus lorem, lacinia tincidunt tellus varius nec. Vestibulum arcu turpis, facilisis sed ligula ac, maximus malesuada neque. Phasellus commodo cursus pretium.",
-                ImageUrl = "sweetpie.jpg",
-                CategoryName = "Dessert"
-            });
-            modelBuilder.Entity<Product>().HasData(new Product
-            {
-                ProductId = 4,
-                Name = "Pav Bhaji",
-                Price = 15,
-                Description = "Praesent scelerisque, mi sed ultrices condimentum, lacus ipsum viverra massa, in lobortis sapien eros in arcu. Quisque vel lacus ac magna vehicula sagittis ut non lacus.<br/>Sed volutpat tellus lorem, lacinia tincidunt tellus varius nec. Vestibulum arcu turpis, facilisis sed ligula ac, maximus malesuada neque. Phasellus commodo cursus pretium.",
-                ImageUrl = "pavbhaji.jpg",
-                CategoryName = "Entree"
-            });
+            modelBuilder.Entity<Product>()
+                .HasMany(p => p.Images)
+                .WithOne(i => i.Product)
+                .HasForeignKey(i => i.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Variant>()
+                .HasOne(v => v.Image)
+                .WithMany(i => i.Variants)
+                .HasForeignKey(v => v.ImageId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Product>().HasData(SeedData.GetProducts());
+            modelBuilder.Entity<Image>().HasData(SeedData.GetImages());
+            modelBuilder.Entity<Variant>().HasData(SeedData.GetVariants());
         }
     }
 }
