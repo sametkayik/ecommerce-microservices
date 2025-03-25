@@ -1,0 +1,74 @@
+# MacOS özel dosyalar
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Visual Studio Code özel dosyalar
+.vscode/
+.history/
+
+# Rider özel dosyalar
+.idea/
+
+# .NET dosya türleri
+bin/
+obj/
+
+# .NET Core build dosyaları
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# VS/IDE-specific dosyalar
+.vs/
+.vs2017/
+.vs2019/
+.vs2015/
+
+# User-specific dosyalar
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# Windows-specific dosyalar
+Thumbs.db
+ehthumbs.db
+
+# Package yönetimi dosyaları (NuGet)
+*.nupkg
+# NuGet eski package cache
+.nuget/
+# Paket restore log dosyaları
+packages/
+
+# Windows Installer ve .NET Framework dosyaları
+*.msi
+*.cab
+*.dll
+
+# Temporary ASP.NET Files
+# Bu dosyalar .NET Core uygulamalarında geçici derleme dosyalarıdır.
+# Genelde her build sırasında yenisi oluşturulur.
+*.bak
+*.swp
+# ASP.NET Core portları
+applicationhost.config
+# Bin ve obj klasörlerinin geçici dosyaları
+wwwroot/
+logs/
+
+# ASP.NET temporary files
+~/.nuget/
+~/.dotnet/
+
+# Rider logs
+.idea/.idea*/log/
+
+# Build Log dosyaları
+build/
+test/
+
+# PowerShell ve CLI tool dosyaları
+*.psd1
+*.psm1
