@@ -31,14 +31,14 @@ namespace Ecommerce.Services.Identity
                 {
                     ClientId="client",
                     ClientSecrets= { new Secret("secret".Sha256())},
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
                     AllowedScopes={ "read", "write","profile"}
                 },
                 new Client
                 {
                     ClientId="DefineX",
                     ClientSecrets= { new Secret("secret".Sha256())},
-                    AllowedGrantTypes = GrantTypes.Code,
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
                     RedirectUris={ "https://localhost:44378/signin-oidc" },
                     PostLogoutRedirectUris={"https://localhost:44378/signout-callback-oidc" },
                     AllowedScopes=new List<string>
