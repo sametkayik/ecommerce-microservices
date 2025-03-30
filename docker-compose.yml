@@ -1,0 +1,126 @@
+services:
+  apigateway:
+    build:
+      context: .
+      dockerfile: APIGateway/Dockerfile
+    ports:
+      - "5002:8080"
+      - "5003:8081"
+    depends_on:
+      - productapi
+      - identity
+      - couponapi
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - app_network
+
+  productapi:
+    build:
+      context: .
+      dockerfile: Ecommerce.Services.ProductAPI/Dockerfile
+    ports:
+      - "44390:8080"
+      - "60087:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings:DefaultConnection=Server=sqlserver;Database=ProductDB;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;
+    networks:
+      - app_network
+
+  identity:
+    build:
+      context: .
+      dockerfile: Ecommerce.Services.Identity/Dockerfile
+    ports:
+      - "44365:8080"
+      - "43432:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings:DefaultConnection=Server=sqlserver;Database=IdentityDB;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;
+    networks:
+        - app_network
+
+  couponapi:
+    build:
+      context: .
+      dockerfile: Ecommerce.Services.CouponAPI/Dockerfile
+    ports:
+      - "44393:8080"
+      - "61848:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings:DefaultConnection=Server=sqlserver;Database=CouponDB;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;
+    networks:
+        - app_network
+
+  chat:
+    build:
+      context: .
+      dockerfile: Ecommerce.Services.Chat/Dockerfile
+    ports:
+      - "44328:8080"
+      - "62161:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - app_network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=yourStrong(!)Password
+      - MSSQL_PID=Developer
+      - MSSQL_AGENT_ENABLED=true
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+      - ./mssql-log:/var/opt/mssql/log:rw
+      - ./mssql-data:/var/opt/mssql/data:rw
+      - ./mssql-system:/var/opt/mssql/.system:rw
+    command: 
+      - /bin/bash
+      - -c
+      - |
+        mkdir -p /var/opt/mssql/log
+        chmod -R 770 /var/opt/mssql/log
+        chown -R mssql:mssql /var/opt/mssql/log
+        /opt/mssql/bin/sqlservr
+    networks:
+      - app_network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - app_network
+
+  migrations:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    depends_on:
+      - sqlserver
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: >
+      sh -c "
+      sleep 10 &&
+      dotnet ef database update --project Ecommerce.Services.ProductAPI --connection 'Server=sqlserver,1433;Database=ProductDB;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;' &&
+      dotnet ef database update --project Ecommerce.Services.Identity --connection 'Server=sqlserver,1433;Database=IdentityDB;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;' &&
+      dotnet ef database update --project Ecommerce.Services.CouponAPI --connection 'Server=sqlserver,1433;Database=CouponDB;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True;'
+      "
+
+volumes:
+  sqlserverdata:
+
+networks:
+  app_network:
+    driver: bridge  # Bu kısmı doğru şekilde yazdık

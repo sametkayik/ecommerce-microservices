@@ -7,26 +7,26 @@
     }
   },
   "AllowedHosts": "*",
-  "ProductAPI": "https://localhost:44390",
-  "Identity": "https://localhost:44365",
-  "CartAPI": "https://localhost:44338",
-  "CouponAPI": "https://localhost:44393",
+  "ProductAPI": "http://localhost:44390",
+  "Identity": "http://localhost:44365",
+  "CartAPI": "http://localhost:44338",
+  "CouponAPI": "http://localhost:44393",
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api/products",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 44390
-        }
-      ],
-      "UpstreamPathTemplate": "/api/products",
-      "UpstreamHttpMethod": ["GET"]
-    },
+  "DownstreamPathTemplate": "/api/products",
+  "DownstreamScheme": "http",
+  "DownstreamHostAndPorts": [
+    {
+      "Host": "localhost",
+      "Port": 44390
+    }
+  ],
+  "UpstreamPathTemplate": "/api/products",
+  "UpstreamHttpMethod": ["GET"]
+},
     {
       "DownstreamPathTemplate": "/api/products/{id}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
@@ -38,7 +38,7 @@
     },
     {
       "DownstreamPathTemplate": "/api/products",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
@@ -54,7 +54,7 @@
     },
     {
       "DownstreamPathTemplate": "/api/products/{id}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
@@ -210,6 +210,6 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "https://localhost:5002"
+    "BaseUrl": "http://localhost:5002"
   }
 }
